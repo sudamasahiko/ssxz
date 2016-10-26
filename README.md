@@ -5,6 +5,8 @@
   
 2.一般ユーザにてSSHの鍵ペアを作成  
 cd ~/.ssh  
+上記なければmkdir ~/.ssh  
+chmod 700 ~/.ssh  
 ssh-keygen -t rsa  
 pass phraseは以下を設定  
 1234qwer  
