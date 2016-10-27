@@ -56,7 +56,14 @@ cat id_rsa_[username] >> authorized_keys
 chmod 600 authorized_keys
 秘密鍵を各ユーザに配布
 
-
+8.2-4台目にssxzユーザを作成し、SSH設定を行った
+9.1台目から2-4台目に疎通を確認(ping, ssh接続)
+10.virt-installの試行
+11.kickstartの設定
+12.GitHubからのデプロイの試行
+13.
+14.
+15.
 
 
 
