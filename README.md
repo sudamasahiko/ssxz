@@ -50,3 +50,13 @@ ssxz
 各ユーザにて、ssh用の鍵を格納するディレクトリを作成  
 mkdir ~/.ssh  
 chmod 700 ~/.ssh  
+cd ~/.ssh  
+ssh-keygen -t rsa  
+cat id_rsa_[username] >> authorized_keys  
+chmod 600 authorized_keys
+秘密鍵を各ユーザに配布
+
+
+
+
+
