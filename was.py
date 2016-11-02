@@ -17,7 +17,9 @@ def HandlerFactory(was):
             self.send_response(200)
             self.send_header('Content-Type', 'text/json')
             self.end_headers()
-            responseData = json.dumps({'spam': self.was.ack()})
+            
+            #responseData = json.dumps({'spam': self.was.ack()})
+            responseData = self.path
             self.wfile.write(responseData.encode('UTF-8'))
 
     return MyHandler
