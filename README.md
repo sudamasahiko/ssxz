@@ -63,24 +63,24 @@ chmod 600 authorized_keys
 12.GitHubからのデプロイの試行
 13.2,3,4台目に以下を実行
 【install libvirt】
-\# yum install -y qemu-kvm virt-manager libvirt libvirt-python virt-install virt-viewer
-\# systemctl start libvirtd
-\# systemctl enable libvirtd
-
-【install pip】
-curl "https://bootstrap.pypa.io/get-pip.py" -o "get-pip.py"
-python get-pip.py
-
-【ssh packages for python】
-\# yum install -y gcc libffi-devel python-devel openssl-devel
-\# pip install paramiko
-
-【install git】
-yum install -y git
-
-【agent transfer】
-git clone https://github.com/sudamasahiko/ssxz.git
-
+\# yum install -y qemu-kvm virt-manager libvirt libvirt-python virt-install virt-viewer  
+\# systemctl start libvirtd  
+\# systemctl enable libvirtd  
+  
+【install pip】  
+curl "https://bootstrap.pypa.io/get-pip.py" -o "get-pip.py"  
+python get-pip.py  
+  
+【ssh packages for python】  
+\# yum install -y gcc libffi-devel python-devel openssl-devel  
+\# pip install paramiko  
+  
+【install git】  
+yum install -y git  
+  
+【agent transfer】  
+git clone https://github.com/sudamasahiko/ssxz.git  
+  
 14.
 15.
 
