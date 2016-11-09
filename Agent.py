@@ -193,6 +193,18 @@ try:
         # XXX len(sys.argv) check!!
         obj = Agent(sys.argv[2], sys.argv[3])
         obj.start()
+    elif sys.argv[1] == 'is_ssh_up':
+        # XXX len(sys.argv) check!!
+        obj = Agent(sys.argv[2], sys.argv[3])
+        print obj.is_ssh_up()
+    elif sys.argv[1] == 'has_instance':
+        # XXX len(sys.argv) check!!
+        obj = Agent(sys.argv[2], sys.argv[3])
+        print obj.has_instance()
+    elif sys.argv[1] == 'undefine':
+        # XXX len(sys.argv) check!!
+        obj = Agent(sys.argv[2], sys.argv[3])
+        obj.undefine()
     elif sys.argv[1] == 'make_instance':
         # XXX len(sys.argv) check!!
         obj = Agent(sys.argv[2], sys.argv[3])
