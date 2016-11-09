@@ -192,6 +192,10 @@ try:
     elif sys.argv[1] == 'start':
         # XXX len(sys.argv) check!!
         obj = Agent(sys.argv[2], sys.argv[3])
+        obj.start()
+    elif sys.argv[1] == 'make_instance':
+        # XXX len(sys.argv) check!!
+        obj = Agent(sys.argv[2], sys.argv[3])
         obj.make_instance(sys.argv[4], sys.argv[5], sys.argv[6])
 except:
     pass
