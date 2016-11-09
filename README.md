@@ -81,8 +81,10 @@ yum install -y git
 【agent transfer】  
 git clone https://github.com/sudamasahiko/ssxz.git  
   
-14.
-15.
+【scp file transfer】  
+scp CentOS-7-x86_64-Minimal-1511.iso root@192.168.0.2:/home/ssxz  
+scp CentOS-7-x86_64-Minimal-1511.iso root@192.168.0.3:/home/ssxz  
+scp CentOS-7-x86_64-Minimal-1511.iso root@192.168.0.4:/home/ssxz  
 
 
 
