@@ -186,9 +186,12 @@ echo "chmod 600 /root/.ssh/authorized_keys" >> /bootscript
 #
 try:
     if sys.argv[1] == 'is_up':
+        # XXX len(sys.argv) check!!
         obj = Agent(sys.argv[2], sys.argv[3])
         print obj.is_up()
-        # obj = Agent(sys.argv[2], sys.argv[3])
-        # obj.make_instance(1, 1024, 4)
+    elif sys.argv[1] == 'start':
+        # XXX len(sys.argv) check!!
+        obj = Agent(sys.argv[2], sys.argv[3])
+        obj.make_instance(sys.argv[4], sys.argv[5], sys.argv[6])
 except:
     pass
