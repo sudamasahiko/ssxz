@@ -171,7 +171,7 @@ echo "chmod 600 /root/.ssh/authorized_keys" >> /bootscript
 --ram=""" + ram + """ \\
 --location=/home/ssxz/CentOS-7-x86_64-Minimal-1511.iso \\
 --disk path=/var/kvm/disk/""" + name + """/disk.qcow2,format=qcow2,size=""" + hdd + """ \\
---network bridge=virbr0 \\
+--network bridge=br0 \\
 --arch=x86_64 \\
 --os-type=linux \\
 --os-variant=rhel7 \\
