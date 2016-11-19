@@ -199,8 +199,6 @@ def callback(ch, method, properties, body):
     print " [*] Creating %r" % (name,)
 
 # stays like a daemon
-# if __name__ == "__main__":
-
 # connect into the message queue server
 credentials = pika.PlainCredentials('guest', 'guest')
 parameters = pika.ConnectionParameters('202.247.58.211', 5672, '/', credentials)
@@ -208,7 +206,7 @@ connection = pika.BlockingConnection(parameters)
 channel = connection.channel()
 
 # confirm the target queue is existed. durable : message is saved for ever
-channel.queue_declare(queue='task_queue_2', durable=True)
+channel.queue_declare(queue='task_queue_2', durable=False)
 print "[*] Waiting for messages. To exit press CTRL+C"
 
 # receive a message and treat with the massage received
