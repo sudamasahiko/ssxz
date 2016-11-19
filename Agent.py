@@ -187,6 +187,16 @@ echo "chmod 600 /root/.ssh/authorized_keys" >> /bootscript
 # worker function
 def callback(ch, method, properties, body):
     print " [*] Received %r" % (body,)
+    cmd = body.split(',')
+    if cmd[0] == 'c':
+        cpu = cmd[2]
+        ram = cmd[3]
+        disk = cmd[4]
+        name = cmd[5]
+        ip = cmd[6]
+        obj = Agent(name, ip)
+        obj.make_instance(cpu, ram, disk)
+    print " [*] Creating %r" % (name,)
 
 # styas like a daemon
 if __name__ == "__main__":
