@@ -208,7 +208,7 @@ if __name__ == "__main__":
     channel = connection.channel()
 
     # confirm the target queue is existed. durable : message is saved for ever
-    channel.queue_declare(queue='task_queue_2', durable=True)
+    channel.queue_declare(queue='task_queue_2')
     print "[*] Waiting for messages. To exit press CTRL+C"
 
     # receive a message and treat with the massage received
