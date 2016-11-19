@@ -8,6 +8,7 @@ import sys
 import subprocess
 import paramiko
 import os
+import pika
 
 class Agent():
     """Class: Agent
@@ -183,31 +184,52 @@ echo "chmod 600 /root/.ssh/authorized_keys" >> /bootscript
         f.write(output)
         f.close()
 
-#
-try:
-    if sys.argv[1] == 'is_up':
-        # XXX len(sys.argv) check!!
-        obj = Agent(sys.argv[2], sys.argv[3])
-        print obj.is_up()
-    elif sys.argv[1] == 'start':
-        # XXX len(sys.argv) check!!
-        obj = Agent(sys.argv[2], sys.argv[3])
-        obj.start()
-    elif sys.argv[1] == 'is_ssh_up':
-        # XXX len(sys.argv) check!!
-        obj = Agent(sys.argv[2], sys.argv[3])
-        print obj.is_ssh_up()
-    elif sys.argv[1] == 'has_instance':
-        # XXX len(sys.argv) check!!
-        obj = Agent(sys.argv[2], sys.argv[3])
-        print obj.has_instance()
-    elif sys.argv[1] == 'undefine':
-        # XXX len(sys.argv) check!!
-        obj = Agent(sys.argv[2], sys.argv[3])
-        obj.undefine()
-    elif sys.argv[1] == 'make_instance':
-        # XXX len(sys.argv) check!!
-        obj = Agent(sys.argv[2], sys.argv[3])
-        obj.make_instance(sys.argv[4], sys.argv[5], sys.argv[6])
-except:
-    pass
+# worker function
+def callback(ch, method, properties, body):
+    print " [*] Received %r" % (body,)
+
+# styas like a daemon
+if __name__ == "__main__":
+
+    # connect into the message queue server
+    credentials = pika.PlainCredentials('guest', 'guest')
+    parameters = pika.ConnectionParameters('202.247.58.211', 5672, '/', credentials)
+    connection = pika.BlockingConnection(parameters)
+    channel = connection.channel()
+
+    # confirm the target queue is existed. durable : message is saved for ever
+    channel.queue_declare(queue='task_queue_2', durable=True)
+    print "[*] Waiting for messages. To exit press CTRL+C"
+
+    # receive a message and treat with the massage received
+    channel.basic_consume(callback, queue='task_queue_2')
+    channel.start_consuming()
+
+# tests
+# try:
+#     if sys.argv[1] == 'is_up':
+#         # XXX len(sys.argv) check!!
+#         obj = Agent(sys.argv[2], sys.argv[3])
+#         print obj.is_up()
+#     elif sys.argv[1] == 'start':
+#         # XXX len(sys.argv) check!!
+#         obj = Agent(sys.argv[2], sys.argv[3])
+#         obj.start()
+#     elif sys.argv[1] == 'is_ssh_up':
+#         # XXX len(sys.argv) check!!
+#         obj = Agent(sys.argv[2], sys.argv[3])
+#         print obj.is_ssh_up()
+#     elif sys.argv[1] == 'has_instance':
+#         # XXX len(sys.argv) check!!
+#         obj = Agent(sys.argv[2], sys.argv[3])
+#         print obj.has_instance()
+#     elif sys.argv[1] == 'undefine':
+#         # XXX len(sys.argv) check!!
+#         obj = Agent(sys.argv[2], sys.argv[3])
+#         obj.undefine()
+#     elif sys.argv[1] == 'make_instance':
+#         # XXX len(sys.argv) check!!
+#         obj = Agent(sys.argv[2], sys.argv[3])
+#         obj.make_instance(sys.argv[4], sys.argv[5], sys.argv[6])
+# except:
+#     pass
