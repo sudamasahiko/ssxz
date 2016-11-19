@@ -198,22 +198,22 @@ def callback(ch, method, properties, body):
         obj.make_instance(cpu, ram, disk)
     print " [*] Creating %r" % (name,)
 
-# styas like a daemon
-if __name__ == "__main__":
+# stays like a daemon
+# if __name__ == "__main__":
 
-    # connect into the message queue server
-    credentials = pika.PlainCredentials('guest', 'guest')
-    parameters = pika.ConnectionParameters('202.247.58.211', 5672, '/', credentials)
-    connection = pika.BlockingConnection(parameters)
-    channel = connection.channel()
+# connect into the message queue server
+credentials = pika.PlainCredentials('guest', 'guest')
+parameters = pika.ConnectionParameters('202.247.58.211', 5672, '/', credentials)
+connection = pika.BlockingConnection(parameters)
+channel = connection.channel()
 
-    # confirm the target queue is existed. durable : message is saved for ever
-    channel.queue_declare(queue='task_queue_2', durable=True)
-    print "[*] Waiting for messages. To exit press CTRL+C"
+# confirm the target queue is existed. durable : message is saved for ever
+channel.queue_declare(queue='task_queue_2', durable=True)
+print "[*] Waiting for messages. To exit press CTRL+C"
 
-    # receive a message and treat with the massage received
-    channel.basic_consume(callback, queue='task_queue_2')
-    channel.start_consuming()
+# receive a message and treat with the massage received
+channel.basic_consume(callback, queue='task_queue_2')
+channel.start_consuming()
 
 # tests
 # try:
