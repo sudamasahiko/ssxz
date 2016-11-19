@@ -186,6 +186,7 @@ echo "chmod 600 /root/.ssh/authorized_keys" >> /bootscript
 
 # worker function
 def callback(ch, method, properties, body):
+    # XXX get?
     print " [*] Received %r" % (body,)
     cmd = body.split(',')
     if cmd[0] == 'c':
@@ -196,19 +197,25 @@ def callback(ch, method, properties, body):
         ip = cmd[6]
         obj = Agent(name, ip)
         obj.make_instance(cpu, ram, disk)
-    print " [*] Creating %r" % (name,)
+        print " [*] Creating %r" % (name,)
+    elif cmd[0] == 'd': # XXX d is ok?
+        obj = Agent(name, ip)
+        obj.undefine()
+        print " [*] Undefying %r" % (name,)
 
 # stays like a daemon
 # connect into the message queue server
+machine = sys.argv[1]
+queue = 'task_queue_' + str(machine)
 credentials = pika.PlainCredentials('guest', 'guest')
 parameters = pika.ConnectionParameters('202.247.58.211', 5672, '/', credentials)
 connection = pika.BlockingConnection(parameters)
 channel = connection.channel()
-channel.queue_declare(queue='task_queue_2', durable=True)
+channel.queue_declare(queue=queue, durable=True)
 print "[*] Waiting for messages. To exit press CTRL+C"
 
 # receive a message and treat with the massage received
-channel.basic_consume(callback, queue='task_queue_2')
+channel.basic_consume(callback, queue=queue, no_ack=True)
 channel.start_consuming()
 
 # tests
