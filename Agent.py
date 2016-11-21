@@ -198,7 +198,9 @@ def callback(ch, method, properties, body):
         obj = Agent(name, ip)
         obj.make_instance(cpu, ram, disk)
         print " [*] Creating %r" % (name,)
-    elif cmd[0] == 'd': # XXX d is ok?
+    elif cmd[0] == 'd':
+        name = cmd[2]
+        ip = cmd[3]
         obj = Agent(name, ip)
         obj.undefine()
         print " [*] Undefying %r" % (name,)
