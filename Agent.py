@@ -206,21 +206,6 @@ def callback(ch, method, properties, body):
         obj.undefine()
         print " [*] Undefying %r" % (name,)
 
-# stays like a daemon
-# connect into the message queue server
-machine = sys.argv[1]
-queue = 'task_queue_' + str(machine)
-credentials = pika.PlainCredentials('guest', 'guest')
-parameters = pika.ConnectionParameters('202.247.58.211', 5672, '/', credentials)
-connection = pika.BlockingConnection(parameters)
-channel = connection.channel()
-channel.queue_declare(queue=queue, durable=True)
-print "[*] Waiting for messages. To exit press CTRL+C"
-
-# receive a message and treat with the massage received
-channel.basic_consume(callback, queue=queue, no_ack=True)
-channel.start_consuming()
-
 # watchdog thread
 def wrap_loop_thread(__sec_interval):
     def recieve_func(func):
@@ -237,8 +222,24 @@ INTERVAL_SEC_LOOP=5
 def func_loop(text):
     print(text)
 
-if __name__=="__main__":
-    func_loop("spam")
+func_loop("spam")
+
+
+# stays like a daemon
+# connect into the message queue server
+machine = sys.argv[1]
+queue = 'task_queue_' + str(machine)
+credentials = pika.PlainCredentials('guest', 'guest')
+parameters = pika.ConnectionParameters('202.247.58.211', 5672, '/', credentials)
+connection = pika.BlockingConnection(parameters)
+channel = connection.channel()
+channel.queue_declare(queue=queue, durable=True)
+print "[*] Waiting for messages. To exit press CTRL+C"
+
+# receive a message and treat with the massage received
+channel.basic_consume(callback, queue=queue, no_ack=True)
+channel.start_consuming()
+
 
 # tests
 # try:
