@@ -10,6 +10,7 @@ import paramiko
 import os
 import pika
 import functools,threading
+import sqlite3
 
 class Agent():
     """Class: Agent
@@ -23,6 +24,8 @@ class Agent():
         self.name = name
         self.ip = ip
         self.dir = '/var/kvm/disk/' + name + '/'
+        # XXX check argv[1]
+        self.machine = sys.argv[1]
 
     # check if vm is running
     def is_up(self):
@@ -198,6 +201,15 @@ def callback(ch, method, properties, body):
         ip = cmd[6]
         obj = Agent(name, ip)
         obj.make_instance(cpu, ram, disk)
+
+        # watch
+        conn = sqlite3.connect('vmstate.db')
+        cur = conn.cursor()
+        sql = "INSERT INTO vmstate values('"+name+"', '"+ip+"')"
+        cur.execute(sql)
+        conn.commit()
+        conn.close()
+
         print " [*] Creating %r" % (name,)
     elif cmd[0] == 'd':
         name = cmd[2]
@@ -205,6 +217,9 @@ def callback(ch, method, properties, body):
         obj = Agent(name, ip)
         obj.undefine()
         print " [*] Undefying %r" % (name,)
+
+        # delete queue
+        # todo
 
 # watchdog thread
 def wrap_loop_thread(__sec_interval):
@@ -217,26 +232,44 @@ def wrap_loop_thread(__sec_interval):
         return wrapper
     return recieve_func
 
-INTERVAL_SEC_LOOP=5
+INTERVAL_SEC_LOOP=6
 @wrap_loop_thread(INTERVAL_SEC_LOOP)
 def func_loop():
-    name = 'centos_112'
-    ip = '192.168.122.112'
-    obj = Agent(name, ip)
-    print('is_up:'+str(obj.is_up()))
-    print('is_ssh_up:'+str(obj.is_ssh_up()))
+    conn = sqlite3.connect('vmstate.db')
+    cur = conn.cursor()
+    for row in cur.execute('SELECT * FROM vmstate'):
+        print(row[0])
+        print(row[1])
+
+
+    conn.close()
+    # name = 'centos_112'
+    # ip = '192.168.122.112'
+    # obj = Agent(name, ip)
+    # print('is_up:'+str(obj.is_up()))
+    # print('is_ssh_up:'+str(obj.is_ssh_up()))
+
+    # result queue
+    # credentials = pika.PlainCredentials('guest', 'guest')
+    # parameters = pika.ConnectionParameters('202.247.58.211', 5672, '/', credentials)
+    # connection = pika.BlockingConnection(parameters)
+    # channel = connection.channel()
+    # machine = sys.argv[1]
+    # queue = 'resultq'
+    # channel.queue_declare(queue=queue, durable=True)
+
 
 func_loop()
 
 
 # stays like a daemon
 # connect into the message queue server
-machine = sys.argv[1]
-queue = 'task_queue_' + str(machine)
 credentials = pika.PlainCredentials('guest', 'guest')
 parameters = pika.ConnectionParameters('202.247.58.211', 5672, '/', credentials)
 connection = pika.BlockingConnection(parameters)
 channel = connection.channel()
+machine = sys.argv[1]
+queue = 'task_queue_' + str(machine)
 channel.queue_declare(queue=queue, durable=True)
 print "[*] Waiting for messages. To exit press CTRL+C"
 
