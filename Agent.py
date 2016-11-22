@@ -219,11 +219,13 @@ def wrap_loop_thread(__sec_interval):
 
 INTERVAL_SEC_LOOP=5
 @wrap_loop_thread(INTERVAL_SEC_LOOP)
-def func_loop(text):
-    print(text)
+def func_loop():
+    name = 'centos_112'
+    ip = '192.168.122.112'
+    obj = Agent(name, ip)
+    print(obj.is_up())
 
-print 'ham'
-func_loop("spam")
+func_loop()
 
 
 # stays like a daemon
