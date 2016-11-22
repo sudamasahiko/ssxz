@@ -252,7 +252,7 @@ def watch_vm_state(name, ip):
         body = 'c,'+name+pk
         print body
         # channel.basic_publish(exchange='', routing_key=queue, body=body, 
-            properties=pika.BasicProperties(delivery_mode=2,))
+        #    properties=pika.BasicProperties(delivery_mode=2,))
 
 
         # delete tast from db
