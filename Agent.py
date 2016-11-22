@@ -232,21 +232,12 @@ def wrap_loop_thread(__sec_interval):
         return wrapper
     return recieve_func
 
-INTERVAL_SEC_LOOP=6
-@wrap_loop_thread(INTERVAL_SEC_LOOP)
-def func_loop():
-    conn = sqlite3.connect('vmstate.db')
-    cur = conn.cursor()
-    for row in cur.execute('SELECT * FROM vmstate'):
-        print(row[0])
-        print(row[1])
-
-
-    conn.close()
-    # name = 'centos_112'
-    # ip = '192.168.122.112'
-    # obj = Agent(name, ip)
-    # print('is_up:'+str(obj.is_up()))
+# 
+def watch_vm_state(name, ip):
+    print(name)
+    print(ip)
+    obj = Agent(name, ip)
+    print('is_up:'+str(obj.is_up()))
     # print('is_ssh_up:'+str(obj.is_ssh_up()))
 
     # result queue
@@ -258,6 +249,20 @@ def func_loop():
     # queue = 'resultq'
     # channel.queue_declare(queue=queue, durable=True)
 
+threads = []
+INTERVAL_SEC_LOOP=6
+@wrap_loop_thread(INTERVAL_SEC_LOOP)
+def func_loop():
+    conn = sqlite3.connect('vmstate.db')
+    cur = conn.cursor()
+    for row in cur.execute('SELECT * FROM vmstate'):
+
+        # check in thread
+        t = threading.Thread(target=watch_vm_state, args=(row[0], row[1], ))
+        threads.append(t)
+        t.start()
+
+    conn.close()
 
 func_loop()
 
