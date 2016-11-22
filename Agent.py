@@ -223,8 +223,8 @@ def func_loop():
     name = 'centos_112'
     ip = '192.168.122.112'
     obj = Agent(name, ip)
-    print('is_up:'+obj.is_up())
-    print('is_ssh_up:'+obj.is_ssh_up())
+    print('is_up:'+str(obj.is_up()))
+    print('is_ssh_up:'+str(obj.is_ssh_up()))
 
 func_loop()
 
