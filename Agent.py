@@ -222,6 +222,7 @@ INTERVAL_SEC_LOOP=5
 def func_loop(text):
     print(text)
 
+print 'ham'
 func_loop("spam")
 
 
