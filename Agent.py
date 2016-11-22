@@ -237,17 +237,35 @@ def watch_vm_state(name, ip):
     print(name)
     print(ip)
     obj = Agent(name, ip)
-    print('is_up:'+str(obj.is_up()))
-    # print('is_ssh_up:'+str(obj.is_ssh_up()))
 
-    # result queue
-    # credentials = pika.PlainCredentials('guest', 'guest')
-    # parameters = pika.ConnectionParameters('202.247.58.211', 5672, '/', credentials)
-    # connection = pika.BlockingConnection(parameters)
-    # channel = connection.channel()
-    # machine = sys.argv[1]
-    # queue = 'resultq'
-    # channel.queue_declare(queue=queue, durable=True)
+    if obj.is_ssh_up():
+        # result queue
+        credentials = pika.PlainCredentials('guest', 'guest')
+        parameters = pika.ConnectionParameters('202.247.58.211', 5672, '/', credentials)
+        connection = pika.BlockingConnection(parameters)
+        channel = connection.channel()
+        queue = 'resultq'
+        channel.queue_declare(queue=queue, durable=True)
+        keyfile = '/var/kvm/disk/'+name+'/id_rsa'
+        with open(keyfile, 'r') as fp:
+            pk = fp.read()
+        body = 'c,'+name+pk
+        print body
+        # channel.basic_publish(exchange='', routing_key=queue, body=body, 
+            properties=pika.BasicProperties(delivery_mode=2,))
+
+
+        # delete tast from db
+        conn = sqlite3.connect('vmstate.db')
+        cur = conn.cursor()
+        sql = 'DELETE FROM vmstate WHERE name="'+name+'"'
+        cur.execute(sql)
+        conn.commit()
+    elif not obj.is_up():
+        obj.start()
+    else:
+        # wait until ssh is up
+        pass
 
 threads = []
 INTERVAL_SEC_LOOP=6
