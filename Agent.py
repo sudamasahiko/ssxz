@@ -219,7 +219,15 @@ def callback(ch, method, properties, body):
         print " [*] Undefying %r" % (name,)
 
         # delete queue
-        # todo
+        credentials = pika.PlainCredentials('guest', 'guest')
+        parameters = pika.ConnectionParameters('202.247.58.211', 5672, '/', credentials)
+        connection = pika.BlockingConnection(parameters)
+        channel = connection.channel()
+        queue = 'resultq'
+        channel.queue_declare(queue=queue, durable=True)
+        body = 'd,'+name
+        channel.basic_publish(exchange='', routing_key=queue, body=body, 
+           properties=pika.BasicProperties(delivery_mode=2,))
 
 # watchdog thread
 def wrap_loop_thread(__sec_interval):
@@ -250,9 +258,9 @@ def watch_vm_state(name, ip):
         with open(keyfile, 'r') as fp:
             pk = fp.read()
         body = 'c,'+name+','+pk.replace('\n', '%%%%')
-        print body
-        # channel.basic_publish(exchange='', routing_key=queue, body=body, 
-        #    properties=pika.BasicProperties(delivery_mode=2,))
+        # print body
+        channel.basic_publish(exchange='', routing_key=queue, body=body, 
+           properties=pika.BasicProperties(delivery_mode=2,))
 
 
         # delete tast from db
