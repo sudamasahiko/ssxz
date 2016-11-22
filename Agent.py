@@ -249,7 +249,7 @@ def watch_vm_state(name, ip):
         keyfile = '/var/kvm/disk/'+name+'/id_rsa'
         with open(keyfile, 'r') as fp:
             pk = fp.read()
-        body = 'c,'+name+pk
+        body = 'c,'+name+','+pk.replace('\n', '%%%%')
         print body
         # channel.basic_publish(exchange='', routing_key=queue, body=body, 
         #    properties=pika.BasicProperties(delivery_mode=2,))
