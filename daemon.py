@@ -127,3 +127,18 @@ class Daemon:
 		You should override this method when you subclass Daemon. It will be called after the process has been
 		daemonized by start() or restart().
 		"""
+
+	# added
+	def status(self):
+		try:
+			pf = file(self.pidfile,'r')
+			pid = int(pf.read().strip())
+			pf.close()
+		except IOError:
+			pid = None
+	
+		if pid:
+			message = "Daemon is running?\n"
+		else:
+			message = "Daemon is not running?\n"
+		sys.stderr.write(message % self.pidfile)
