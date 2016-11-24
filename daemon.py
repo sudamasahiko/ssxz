@@ -141,4 +141,4 @@ class Daemon:
 			message = "Daemon is running?\n"
 		else:
 			message = "Daemon is not running?\n"
-		sys.stderr.write(message % self.pidfile)
+		sys.stderr.write(message)
