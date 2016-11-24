@@ -58,6 +58,7 @@ class Daemon:
 		# write pidfile
 		atexit.register(self.delpid)
 		pid = str(os.getpid())
+		print('spam')
 		file(self.pidfile,'w+').write("%s\n" % pid)
 	
 	def delpid(self):
@@ -130,6 +131,7 @@ class Daemon:
 
 	# added
 	def status(self):
+		print('filename'+self.pidfile)
 		try:
 			pf = file(self.pidfile,'r')
 			pid = int(pf.read().strip())
@@ -138,7 +140,7 @@ class Daemon:
 			pid = None
 	
 		if pid:
-			message = "Daemon is running?\n"
+			message = "Daemon is running\n"
 		else:
-			message = "Daemon is not running?\n"
+			message = "Daemon is not running\n"
 		sys.stderr.write(message)
