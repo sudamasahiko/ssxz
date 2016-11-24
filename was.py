@@ -13,21 +13,21 @@ def HandlerFactory(was):
             BaseHTTPServer.BaseHTTPRequestHandler.__init__(self, req, client_address, server)
 
         def do_GET(self):
-	    self.send_response(200)
-	    self.send_header('Content-Type', 'text/json')
-	    self.end_headers()
+            self.send_response(200)
+            self.send_header('Content-Type', 'text/json')
+            self.end_headers()
 
-        raw_paras = self.path.split('?')[1].split('&')
-        if raw_paras[0] == 'make_vm' & len(raw_paras) == 4:
-            (cmd, cpu, ram, disk) = raw_paras
-            cpu = cpu.split('=')[1]
-            ram = ram.split('=')[1]
-            disk = disk.split('=')[1]
-            self.was.create(cpu, ram, disk)
-        elif raw_paras[0] == 'kill_vm' & len(raw_paras) == 2:
-            (cmd, instance) = raw_paras
-            instance = instance.split('=')[1]
-            self.was.kill(instance)
+            raw_paras = self.path.split('?')[1].split('&')
+            if raw_paras[0] == 'make_vm' & len(raw_paras) == 4:
+                (cmd, cpu, ram, disk) = raw_paras
+                cpu = cpu.split('=')[1]
+                ram = ram.split('=')[1]
+                disk = disk.split('=')[1]
+                self.was.create(cpu, ram, disk)
+            elif raw_paras[0] == 'kill_vm' & len(raw_paras) == 2:
+                (cmd, instance) = raw_paras
+                instance = instance.split('=')[1]
+                self.was.kill(instance)
     return MyHandler
 
 class WebAPIServer():
