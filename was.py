@@ -1,6 +1,6 @@
 # -*- coding:utf-8 -*-
 
-# 
+#
 # was.py
 import BaseHTTPServer
 import json
@@ -16,33 +16,37 @@ def HandlerFactory(was):
             self.send_response(200)
             self.send_header('Content-Type', 'text/json')
             self.end_headers()
-
             raw_paras = self.path.split('?')[1].split('&')
-            if raw_paras[0] == 'make_vm' & len(raw_paras) == 4:
+            cmd = raw_paras[0].split('=')[1]
+            if cmd == 'make_vm' and len(raw_paras) == 4:
                 (cmd, cpu, ram, disk) = raw_paras
                 cpu = cpu.split('=')[1]
                 ram = ram.split('=')[1]
                 disk = disk.split('=')[1]
                 self.was.create(cpu, ram, disk)
-            elif raw_paras[0] == 'kill_vm' & len(raw_paras) == 2:
+            elif cmd == 'kill_vm' and len(raw_paras) == 2:
                 (cmd, instance) = raw_paras
                 instance = instance.split('=')[1]
                 self.was.kill(instance)
     return MyHandler
 
 class WebAPIServer():
-    def __init__(self, dcm):
+    def __init__(self):
         """ WebAPIServer """
-        self.dcm = dcm
-        server_address = ('', 8000)
+        server_address = ('192.168.122.3', 8000)
         handler = HandlerFactory(self)
         httpd = BaseHTTPServer.HTTPServer(server_address, handler)
         httpd.serve_forever()
 
     def create(self, cpu, ram, disk):
-        req = request('c', cpu+','+ram+','+disk)
-        req.sendMessage()
+        # print('c', cpu+','+ram+','+disk)
+        params = cpu+','+ram+','+disk
+        req = request.request('c', params)
+        print('requesting '+params)
+        ret = req.sendMessage()
+        print('requested. instance id: '+str(ret))
 
     def kill(self, instance):
-        req = request('d', instance)
+        # print('d', instance)
+        req = request.request('d', instance)
         req.sendMessage()

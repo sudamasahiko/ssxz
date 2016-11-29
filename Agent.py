@@ -202,10 +202,19 @@ def callback(ch, method, properties, body):
         obj = Agent(name, ip)
         obj.make_instance(cpu, ram, disk)
 
-        # watch
+        # register to watching list
         conn = sqlite3.connect('vmstate.db')
         cur = conn.cursor()
-        sql = "INSERT INTO vmstate values('"+name+"', '"+ip+"')"
+
+        # check table existance
+        sql = "SELECT name FROM sqlite_master WHERE type='table' AND name='vmstate';"
+        cur.execute(sql)
+        tester = cur.fetchall()
+        if len(tester) == 0:
+            sql = 'CREATE TABLE vmstate(name TEXT, ip TEXT);'
+            cur.execute(sql)
+
+        sql = "INSERT INTO vmstate values('"+name+"', '"+ip+"');"
         cur.execute(sql)
         conn.commit()
         conn.close()
@@ -233,20 +242,18 @@ def callback(ch, method, properties, body):
 def wrap_loop_thread(__sec_interval):
     def recieve_func(func):
         @functools.wraps(func)
-        def wrapper(*args,**kwargs):
-            func(*args,**kwargs)
-            thread_loop=threading.Timer(__sec_interval,functools.partial(wrapper,*args,**kwargs))
+        def wrapper(*args, **kwargs):
+            func(*args, **kwargs)
+            thread_loop=threading.Timer(__sec_interval, functools.partial(wrapper, *args, **kwargs))
             thread_loop.start()
         return wrapper
     return recieve_func
 
-# 
+# this func is called in intervals
 def watch_vm_state(name, ip):
-    print(name)
-    print(ip)
     obj = Agent(name, ip)
-
     if obj.is_ssh_up():
+
         # result queue
         credentials = pika.PlainCredentials('guest', 'guest')
         parameters = pika.ConnectionParameters('202.247.58.211', 5672, '/', credentials)
@@ -258,16 +265,19 @@ def watch_vm_state(name, ip):
         with open(keyfile, 'r') as fp:
             pk = fp.read()
         body = 'c,'+name+','+pk.replace('\n', '%%%%')
-        # print body
         channel.basic_publish(exchange='', routing_key=queue, body=body, 
            properties=pika.BasicProperties(delivery_mode=2,))
+        print "[*] "+name+' is ready. Ssh key sent to resultq.'
 
-
-        # delete tast from db
+        # delete task from db
         conn = sqlite3.connect('vmstate.db')
         cur = conn.cursor()
-        sql = 'DELETE FROM vmstate WHERE name="'+name+'"'
+        sql = "SELECT name FROM sqlite_master WHERE type='table' AND name='vmstate';"
         cur.execute(sql)
+        tester = cur.fetchall()
+        if len(tester) != 0:
+            sql = 'DELETE FROM vmstate WHERE name="'+name+'"'
+            cur.execute(sql)
         conn.commit()
     elif not obj.is_up():
         obj.start()
@@ -275,18 +285,25 @@ def watch_vm_state(name, ip):
         # wait until ssh is up
         pass
 
+# check if vm is fully up in intervals, using threads
+# vmstate.db holds name and ip, which refers vm(s) under installation
 threads = []
-INTERVAL_SEC_LOOP=6
+INTERVAL_SEC_LOOP = 10
 @wrap_loop_thread(INTERVAL_SEC_LOOP)
 def func_loop():
     conn = sqlite3.connect('vmstate.db')
     cur = conn.cursor()
-    for row in cur.execute('SELECT * FROM vmstate'):
 
-        # check in thread
-        t = threading.Thread(target=watch_vm_state, args=(row[0], row[1], ))
-        threads.append(t)
-        t.start()
+    sql = "SELECT name FROM sqlite_master WHERE type='table' AND name='vmstate';"
+    cur.execute(sql)
+    tester = cur.fetchall()
+    if len(tester) != 0:
+        for row in cur.execute('SELECT * FROM vmstate'):
+
+            # check in thread
+            t = threading.Thread(target=watch_vm_state, args=(row[0], row[1], ))
+            threads.append(t)
+            t.start()
 
     conn.close()
 
@@ -306,34 +323,11 @@ print "[*] Waiting for messages. To exit press CTRL+C"
 
 # receive a message and treat with the massage received
 channel.basic_consume(callback, queue=queue, no_ack=True)
-channel.start_consuming()
+# channel.start_consuming()
 
+try:
+    channel.start_consuming()
+except KeyboardInterrupt:
+    channel.stop_consuming()
 
-# tests
-# try:
-#     if sys.argv[1] == 'is_up':
-#         # XXX len(sys.argv) check!!
-#         obj = Agent(sys.argv[2], sys.argv[3])
-#         print obj.is_up()
-#     elif sys.argv[1] == 'start':
-#         # XXX len(sys.argv) check!!
-#         obj = Agent(sys.argv[2], sys.argv[3])
-#         obj.start()
-#     elif sys.argv[1] == 'is_ssh_up':
-#         # XXX len(sys.argv) check!!
-#         obj = Agent(sys.argv[2], sys.argv[3])
-#         print obj.is_ssh_up()
-#     elif sys.argv[1] == 'has_instance':
-#         # XXX len(sys.argv) check!!
-#         obj = Agent(sys.argv[2], sys.argv[3])
-#         print obj.has_instance()
-#     elif sys.argv[1] == 'undefine':
-#         # XXX len(sys.argv) check!!
-#         obj = Agent(sys.argv[2], sys.argv[3])
-#         obj.undefine()
-#     elif sys.argv[1] == 'make_instance':
-#         # XXX len(sys.argv) check!!
-#         obj = Agent(sys.argv[2], sys.argv[3])
-#         obj.make_instance(sys.argv[4], sys.argv[5], sys.argv[6])
-# except:
-#     pass
+connection.close()
