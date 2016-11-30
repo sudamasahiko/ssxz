@@ -25,14 +25,14 @@ systemlctl restart sshd.service
 \# yum install -y nmap  
   
 4.ポートの疎通を確認  
-\# firewall-cmd --zone=external --query-port=50122/tcp  
+\# firewall-cmd --zone=public --query-port=50122/tcp  
 no  
-firewall-cmd --zone=external --add-port=50122/tcp --permanent  
-\# firewall-cmd --zone=external --query-port=22/tcp  
+firewall-cmd --zone=public --add-port=50122/tcp --permanent  
+\# firewall-cmd --zone=public --query-port=50122/tcp  
 -> yes -> ok!  
   
 5.外部からSSH接続を確認 -> ok!  
-puttyを使用  
+puttyを使用(putty用に秘密鍵のフォーマットを変換する必要あり)  
   
 6.2～4台目のネットワーク設定を調整。ipconfigで設定したIPアドレスは、再起動したら解除されていました。  
 以下を設定しました。  
@@ -57,10 +57,15 @@ chmod 600 authorized_keys
 秘密鍵を各ユーザに配布
 
 8.2-4台目にssxzユーザを作成し、SSH設定を行った
+  
 9.1台目から2-4台目に疎通を確認(ping, ssh接続)
+  
 10.virt-installの試行
+  
 11.kickstartの設定
+  
 12.GitHubからのデプロイの試行
+  
 13.2,3,4台目に以下を実行
 【install libvirt】
 \# yum install -y qemu-kvm virt-manager libvirt libvirt-python virt-install virt-viewer  
@@ -75,16 +80,15 @@ python get-pip.py
 \# yum install -y gcc libffi-devel python-devel openssl-devel  
 \# pip install paramiko  
   
-【install git】  
-yum install -y git  
-  
-【agent transfer】  
-git clone https://github.com/sudamasahiko/ssxz.git  
-  
 【scp file transfer】  
 scp CentOS-7-x86_64-Minimal-1511.iso root@192.168.0.2:/home/ssxz  
 scp CentOS-7-x86_64-Minimal-1511.iso root@192.168.0.3:/home/ssxz  
 scp CentOS-7-x86_64-Minimal-1511.iso root@192.168.0.4:/home/ssxz  
-
-
-
+  
+14.全マシンをブリッジ接続に変更  
+/etc/network-script/ifcfg-br0  
+  
+15.イメージファイルの転送      
+scp CentOS-7-x86_64-Minimal-1511.iso root@192.168.0.2:/home/ssxz  
+scp CentOS-7-x86_64-Minimal-1511.iso root@192.168.0.3:/home/ssxz  
+scp CentOS-7-x86_64-Minimal-1511.iso root@192.168.0.4:/home/ssxz  
