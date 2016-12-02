@@ -1,4 +1,23 @@
-# ssxz作業手順書  
+# ssxzシステム起動方法  
+各マシンへSSH接続し、Agentを起動(以下は二台目の例)  
+ssh 192.168.122.4  
+python /home/ssxz/ssxz  
+python Agent.py 2  
+1台目にてWebAPIを起動  
+cd /home/ssxz/ssxz  
+python ssxz_daemon.py start  
+Data Center Managerを起動  
+python dcm.py  
+
+# デモンストレーション方法  
+1台目にてcurlコマンドを発行  
+curl 'http://192.168.122.3:8000?cmd=make_vm&cpu=1&ram=1024&disk=4'  
+上記コマンド実行後、Web API ServerはリクエストキューにVM作成の要求を投げる。  
+DataCenterManagerはリソース管理のDBと照合したのち、タスクキューへVM作成のためのメッセージをエンキューする。  
+各Agentはタスクキューから要求をデキューし、VMの作成・削除を行う。  
+インストール状況は定期的にポーリングを行い、完了後はリザルトキューにSSH秘密鍵を送信する。  
+
+# ssxz作業手順書  
   
 1.OpenSSHがインストールされているか確認 -> OK。CentOSはデフォルトでインストール済み。  
 /usr/sbin/sshd --help  
@@ -34,8 +53,10 @@ firewall-cmd --zone=public --add-port=50122/tcp --permanent
 5.外部からSSH接続を確認 -> ok!  
 puttyを使用(putty用に秘密鍵のフォーマットを変換する必要あり)  
   
-6.2～4台目のネットワーク設定を調整。ipconfigで設定したIPアドレスは、再起動したら解除されていました。  
-以下を設定しました。  
+6.2～4台目のネットワーク設定を調整。 
+以下を設定しました(後程ブリッジ接続へ変更)。  
+\# nmcli con mod em1 ipv4.addresses "192.168.0.2/24 192.168.0.1"  
+\# nmcli con mod em1 ipv4.method manual  
 \# nmcli con mod connection.autoconnect  
 \# nmcli con up em1  
 \# systemctl restart NetworkManager  
@@ -56,17 +77,11 @@ cat id_rsa_[username] >> authorized_keys
 chmod 600 authorized_keys
 秘密鍵を各ユーザに配布
 
-8.2-4台目にssxzユーザを作成し、SSH設定を行った
+8.2-4台目にssxzユーザを作成し、SSH設定を行った(パスワード接続)。  
   
-9.1台目から2-4台目に疎通を確認(ping, ssh接続)
+9.1台目から2-4台目に疎通を確認(ping, ssh接続)  
   
-10.virt-installの試行
-  
-11.kickstartの設定
-  
-12.GitHubからのデプロイの試行
-  
-13.2,3,4台目に以下を実行
+10.2,3,4台目に以下を実行
 【install libvirt】
 \# yum install -y qemu-kvm virt-manager libvirt libvirt-python virt-install virt-viewer  
 \# systemctl start libvirtd  
@@ -86,9 +101,15 @@ scp CentOS-7-x86_64-Minimal-1511.iso root@192.168.0.3:/home/ssxz
 scp CentOS-7-x86_64-Minimal-1511.iso root@192.168.0.4:/home/ssxz  
   
 14.全マシンをブリッジ接続に変更  
-/etc/network-script/ifcfg-br0  
+\# brctl addbr br0  
+\# ip link set br0 up  
+\# brctl addif br0 em1  
+/etc/network-script/ifcfg-br0  
+上記にてDNSアドレス、ゲートウェイを設定
   
-15.イメージファイルの転送  
+15.イメージファイルの転送  
 scp CentOS-7-x86_64-Minimal-1511.iso root@192.168.0.2:/home/ssxz  
 scp CentOS-7-x86_64-Minimal-1511.iso root@192.168.0.3:/home/ssxz  
 scp CentOS-7-x86_64-Minimal-1511.iso root@192.168.0.4:/home/ssxz  
+  
+16.各マシンへAgent.pyをデプロイ
