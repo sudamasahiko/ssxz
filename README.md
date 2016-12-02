@@ -1,5 +1,5 @@
 # ssxzシステム起動方法  
-各マシンへSSH接続し、Agentを起動(以下は二台目の例)  
+各マシンへSSH接続し、Agentを起動(以下は二台目の例)  
 ssh 192.168.122.4  
 python /home/ssxz/ssxz  
 python Agent.py 2  
@@ -10,8 +10,8 @@ Data Center Managerを起動
 python dcm.py  
 
 # デモンストレーション方法  
-1台目にてcurlコマンドを発行  
-curl 'http://192.168.122.3:8000?cmd=make_vm&cpu=1&ram=1024&disk=4'  
+1台目にてcurlコマンドを発行  
+curl 'http://192.168.122.3:8000?cmd=make_vm&cpu=1&ram=1024&disk=4'  
 上記コマンド実行後、Web API ServerはリクエストキューにVM作成の要求を投げる。  
 DataCenterManagerはリソース管理のDBと照合したのち、タスクキューへVM作成のためのメッセージをエンキューする。  
 各Agentはタスクキューから要求をデキューし、VMの作成・削除を行う。  
